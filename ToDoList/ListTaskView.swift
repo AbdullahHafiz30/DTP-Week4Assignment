@@ -9,22 +9,29 @@ import SwiftUI
 
 struct ListTaskView: View {
     @ObservedObject var viewModel: TaskViewModel
-    
+
     var body: some View {
-        List {
-            ForEach(viewModel.sortedTasks, id: \.id) { Task in
-                NavigationLink(destination: TaskDetailView(task: Task)){
-                    Text(Task.title).font(.custom("DINAlternate-Bold", size: 17))
-                    
-                    Text(Task.description).font(.caption).foregroundColor(.secondary)
+        NavigationStack {
+            List {
+                ForEach(viewModel.tasks, id: \.id) { task in
+                    TaskRowView(task: task, toggleCompletion: {
+                        viewModel.toggleTaskCompletion(task)
+                    })
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                    .padding(.vertical, 4)
                 }
-                .listRowBackground(Color.clear)
-                .listRowSeparator(.visible)
-                .accessibilityLabel("List of tasks")
-                .accessibilityHint("Tap on a task to see more details")
-            
-            }.onDelete(perform: viewModel.deleteTasks)
-        }.listStyle(GroupedListStyle())
+                .onDelete(perform: viewModel.deleteTasks)
+                .onMove(perform: viewModel.moveTasks)
+            }
+            .listStyle(PlainListStyle())
+            .navigationTitle("To Do List")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    EditButton()
+                }
+            }
+        }
     }
 }
 
@@ -32,5 +39,4 @@ struct ListTaskView: View {
     NavigationStack {
         ListTaskView(viewModel: TaskViewModel())
     }
-    
 }

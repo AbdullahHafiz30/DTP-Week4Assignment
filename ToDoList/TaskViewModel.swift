@@ -15,16 +15,11 @@ class TaskViewModel: ObservableObject {
         loadTasks()
     }
     
-    // Sort tasks so incomplete ones appear first
-    var sortedTasks: [Task] {
-        tasks.sorted { !$0.isCompleted && $1.isCompleted }
-    }
     
     // Add a new task
     func addTask(with title: String, description: String) {
         let trimmedTitle = title.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedDescription = description.trimmingCharacters(in: .whitespacesAndNewlines)
-        
         guard !trimmedTitle.isEmpty, !trimmedDescription.isEmpty else { return }
         withAnimation(.easeIn(duration: 0.45)) {
             tasks.append(Task(title: trimmedTitle, description: trimmedDescription))
@@ -32,10 +27,24 @@ class TaskViewModel: ObservableObject {
         }
     }
     
-    // Toggle a task’s completion
+    // Enable drag-and-drop reordering
+    func moveTasks(from source: IndexSet, to destination: Int) {
+        tasks.move(fromOffsets: source, toOffset: destination)
+        saveTasks()
+    }
+    
+    // Toggle a task’s completion and automatically move it to the bottom if completed, or top if incomplete.
     func toggleTaskCompletion(_ task: Task) {
         if let index = tasks.firstIndex(where: { $0.id == task.id }) {
             tasks[index].isCompleted.toggle()
+            let updatedTask = tasks.remove(at: index)
+            if updatedTask.isCompleted {
+                // Append to bottom if marked complete
+                tasks.append(updatedTask)
+            } else {
+                // Insert at the top if marked incomplete
+                tasks.insert(updatedTask, at: 0)
+            }
             saveTasks()
         }
     }
@@ -46,13 +55,14 @@ class TaskViewModel: ObservableObject {
         saveTasks()
     }
     
+    // Persistence
     func loadTasks() {
         guard let data = UserDefaults.standard.data(forKey: "tasks") else { return }
         do {
             let decoded = try JSONDecoder().decode([Task].self, from: data)
             tasks = decoded
         } catch {
-            print("Unable to decode expenses: \(error.localizedDescription)")
+            print("Unable to decode tasks: \(error.localizedDescription)")
         }
     }
     
@@ -61,7 +71,7 @@ class TaskViewModel: ObservableObject {
             let data = try JSONEncoder().encode(tasks)
             UserDefaults.standard.set(data, forKey: "tasks")
         } catch {
-            print("Unable to encode expenses: \(error.localizedDescription)")
+            print("Unable to encode tasks: \(error.localizedDescription)")
         }
     }
 }

@@ -9,20 +9,34 @@ import SwiftUI
 
 struct TaskDetailView: View {
     let task: Task
+    
     var body: some View {
-        VStack {
-            List {
-                Section(header: Text("Details")) {
-                    Text(task.title).font(.largeTitle)
-                    Text(task.description).font(.body).fontWeight(.light).font(.body)
-                }
-            }
-        }.navigationTitle("Task Details")
-        // the deatil page should view the title on top and the description under it
+        VStack(alignment: .leading, spacing: 16) {
+            Divider()  // Top horizontal line
+            
+            Text(task.title)
+                .font(.largeTitle)
+                .lineLimit(2)
+                .multilineTextAlignment(.leading)
+            
+            Divider()  // Bottom horizontal line
+            
+            Text(task.description)
+                .font(.body)
+                .multilineTextAlignment(.leading)
+                .foregroundColor(.secondary)
+            
+            Spacer()
+        }
+        .padding()
+        .navigationTitle("Task Details")
     }
 }
 
 #Preview {
-    let sampletask = Task(title: "Hello", description: "World")
-    TaskDetailView(task: sampletask)
+    let sampleTask = Task(title: "Example Task", description: "This is the description for the example task. It provides more detailed information about the task.")
+    NavigationStack {
+        TaskDetailView(task: sampleTask)
+    }
 }
+

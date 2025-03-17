@@ -7,37 +7,65 @@
 
 import SwiftUI
 
+// Custom button style with a subtle scale and opacity animation
+struct AnimatedButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        configuration.label
+            .padding()
+            .frame(maxWidth: .infinity)
+            .background(configuration.isPressed ? Color.accentColor.opacity(0.7) : Color.accentColor)
+            .foregroundColor(.white)
+            .cornerRadius(8)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
+            .animation(.easeOut(duration: 0.2), value: configuration.isPressed)
+    }
+}
+
 struct NewTaskView: View {
     @ObservedObject var viewModel: TaskViewModel
     @State private var taskTitle: String = ""
     @State private var taskDescription: String = ""
     @Environment(\.dismiss) private var dismiss
     
+    // Form validation: both fields must be non-empty.
+    var isFormValid: Bool {
+        !taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty &&
+        !taskDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+    }
+    
     var body: some View {
-        Form {
-            Section(header: Text("New Task")) {
-                TextField("Enter task", text: $taskTitle)
-                    .font(.body)
-                    .accessibilityLabel("Task title input")
-                    .accessibilityHint("Enter the title for your new task")
-                TextField("Description", text: $taskDescription)
-                    .font(.body)
-                    .accessibilityLabel("Task description input")
-                    .accessibilityHint("Enter a description for your new task")
-            }
+        VStack(alignment: .leading, spacing: 20) {
             
-            Button("Add Task") {
+            // Task title input
+            Text("Enter task")
+                .font(.headline)
+            TextField("Task title", text: $taskTitle)
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.gray, lineWidth: 1))
+            
+            // Task description input
+            Text("Enter task description")
+                .font(.headline)
+            TextField("Task description", text: $taskDescription)
+                .padding()
+                .background(RoundedRectangle(cornerRadius: 8).strokeBorder(Color.gray, lineWidth: 1))
+            
+            // Custom animated button
+            Button(action: {
                 viewModel.addTask(with: taskTitle, description: taskDescription)
-                dismiss() // Close the view after adding the task
+                dismiss()
+            }) {
+                Text("Add Task")
+                    .font(.headline)
             }
-            .font(.body)
-            .accessibilityLabel("Add Task")
-            .accessibilityHint("Adds the new task and returns to the task list")
-            .disabled(taskTitle.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .disabled(taskDescription.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            .buttonStyle(AnimatedButtonStyle())
+            .disabled(!isFormValid)
+            .opacity(isFormValid ? 1.0 : 0.5)
+            
+            Spacer()
         }
+        .padding()
         .navigationTitle("Add Task")
-        
     }
 }
 
