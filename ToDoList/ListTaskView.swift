@@ -27,7 +27,7 @@ struct ListTaskView: View {
             .listStyle(PlainListStyle())
             .navigationTitle("To Do List")
             .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
+                ToolbarItem(placement: .navigationBarLeading) {
                     EditButton()
                 }
             }

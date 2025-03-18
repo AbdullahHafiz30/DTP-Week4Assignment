@@ -12,18 +12,19 @@ struct TaskDetailView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Divider()  // Top horizontal line
-            
             Text(task.title)
-                .font(.largeTitle)
-                .lineLimit(2)
-                .multilineTextAlignment(.leading)
-            
-            Divider()  // Bottom horizontal line
+                .font(.title)
+                .frame(height: 55)
+                .frame(maxWidth: .infinity)
+                .background(Color.secondary.opacity(0.2))
+                .cornerRadius(8)
             
             Text(task.description)
-                .font(.body)
-                .multilineTextAlignment(.leading)
+                .padding()
+                .font(.headline)
+                .frame(maxWidth: .infinity)
+                .background(Color.primary.opacity(0.1))
+                .cornerRadius(8)
                 .foregroundColor(.secondary)
             
             Spacer()
